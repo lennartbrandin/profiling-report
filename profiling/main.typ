@@ -31,14 +31,15 @@
   supervisor: none,
   abstract: [
     Performance profiling is a method of analyzing where execution time is spent. 
-    Using profiling tools, it is possible to yield "sections of code that, if optimized, would yield the best overall speed-up." 
+    Using profiling tools, it is possible to locate performance hotspots @bernecky_profiling_1989 which are "sections of code that, if optimized, would yield the best overall speed-up." @graham_gprof_1982 \
+    To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
   ],
   acronyms: [
     #heading(outlined: false)[Acronyms Index]
 
     #print-glossary(glossary, disable-back-references: true)
   ],
-  bibliography: bibliography("literature.bib"),
+  bibliography: bibliography("literature.bib", full: true),
   acknowledgements: none,
 )
 
@@ -51,6 +52,7 @@
 - Typst - General Visualization framework
 - VSCode - Editing && Debugging
 - #gls-short("TUHH") typst ies-report template
+- Google Scholar - Source discovery
 - Generative AI - ChatGPT acquiring topic outline, source discovery
 - Generative AI - Github Copilot code autocomplete, not used for writing passges
 
@@ -59,4 +61,3 @@
 = Conclusion
 
 Using an abbreviation like #gls("TUHH") is a good idea.
-Citing stuff like @kalmanNewApproachLinear1960 is also a good idea.
