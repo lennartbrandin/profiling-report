@@ -33,13 +33,14 @@
     Performance profiling is a method of analyzing where execution time is spent. 
     Using profiling tools, it is possible to locate performance hotspots @bernecky_profiling_1989 which are "sections of code that, if optimized, would yield the best overall speed-up." @graham_gprof_1982 \
     To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
+    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given.
   ],
   acronyms: [
     #heading(outlined: false)[Acronyms Index]
 
     #print-glossary(glossary, disable-back-references: true)
   ],
-  bibliography: bibliography("literature.bib", full: true),
+  bibliography: bibliography("bib/bib.bib", full: true),
   acknowledgements: none,
 )
 
