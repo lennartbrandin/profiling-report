@@ -19,15 +19,21 @@
   ),
   (
     key: "PHot",
-    short: "performance hotspot",
-    plural: "performance hotspots",
-    long: [ "sections of code that, if optimized, would yield the best overall speed-up" @bernecky_profiling_1989 ]
+    short: "bottleneck",
+    long: "performance hotspot",
+    description: [ sections of code that, if optimized, would yield the best overall speed-up @bernecky_profiling_1989 ]
   ),
   (
     key: "IDE",
     short: "IDE",
     long: "Integrated Development Environment",
-    //long: "A toolset for writing, analysing, testing and executing software."
+    description: "A toolset for writing, analysing, testing and executing software."
+  ),
+  (
+    key: "HBug",
+    short: "heisenbug",
+    long: "heisenberg bug",
+    description: "bug that occurs only while observing the program"
   )
 )
 #register-glossary(glossary)
@@ -44,7 +50,7 @@
   supervisor: none,
   abstract: [
     Performance profiling is a method of analyzing where execution time is spent. 
-    Using profiling tools, it is possible to locate #glspl("PHot", long: false) which are #gls("PHot", long: true). \
+    Using profiling tools, it is possible to locate @PHot:pl.
     To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
     This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
   ],
@@ -69,13 +75,13 @@ CPU profiling offers quantitative measurements of runtime associated with specif
 This report will describe an overview different profiling tools and their uses.
 Those presented base on an iterative code-improvement cycle:
 - Execution using a profiler
-- Analysing results for #glspl("PHot", long: false)
+- Analysing results for @PHot:pl
 - Inspecting hotspot code for optimization
-The concept of predictive profiling, i. e. predicting the profiling results without compiling the source code, as part of an #gls("IDE"), will be summarized. @hu_towards_2025
+The concept of predictive profiling, i. e. predicting the profiling results without compiling the source code, as part of an @IDE will be summarized. @hu_towards_2025
 
 == Motivation
 In the process of iterative code-improvement, badly designed code may be visible early on, for example a long running function with little computational complexity.
-Manually finding #glspl("PHot") in low level abstractions, for example, data structures or wrapping functions may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
+Manually finding @PHot:pl in low level abstractions, for example, data structures or wrapping functions may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
 While it is possible to manually measure function runtime by printing time stamps, it is tedious, error prone, and does not provide information about the summed or average execution time of all collective calls to a function.
 Profilers aim to ease spotting these issues by collecting statistics during the execution and providing a profile used for visualising the performance distribution over the program.
 // https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
@@ -94,7 +100,7 @@ The following tools were used to design, research, write this report in the desc
 === Typst - Typesetting
 Typst is a typsetting language, used here to simplify the design process by providing an underlying system of using templates, styles and citations.
 This report was designed using the #link("https://collaborating.tuhh.de/es/ce/public/tuhh-typst")[ #gls-short("TUHH") typst ies-report template ].
-=== VSCode - Editor
+=== VSCode - @IDE
 Visual Studio Code is a general purpose editor, mainly used here to write the report and provide macros and debugging features for Typst.
 === Git/Jujutsu - Version control
 Jujutsu is a git based version control system, used for tracking changes, proof of work, and backing up the report.
@@ -120,11 +126,25 @@ TODO:
 = Preliminaries
 This sections contains definitions and background information that will be used in the report.
 == Profiling
-In profiling were interested statistical measurements of the function calls in the program including:
-- Call count
-- Call time
-- Call relation 
+In profiling were interested in statistical measurements of the function calls in the program including:
+- Call count (Total)
+- Call duration - CPU time inside the call including children (Total and per call)
+- Call time usage - CPU time used exclusively in the call (Total and per call)
+- Call relationship/graph - Call stack, for hierarchy visualisation.
+
+
+=== Instrumentation Method
+Using this method, code is _instrumented_ by altering existing functions. Depending on the tool, this includes some form of call counter, recording the amount of calls to this function often seperated per individual caller. Timing information can also be approximately collected but is "complicated on time-sharing systems" @graham_gprof_1982
+
+Since the program is altered for measuring purposes, its behaviour might change in terms of performance or in extreme cases also introduce a @HBug
+
+=== Sampling (Statistical) Method
+
+=== Hypervisors
+
 
 = Conclusion
 
-Using an abbreviation like #gls("TUHH") is a good idea.
+Using an abbreviation like @TUHH is a good idea.
+
+@TUHH
