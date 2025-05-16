@@ -9,7 +9,8 @@
 #import "@tuhh/ies-report:0.1.0": report
 
 #show: make-glossary
-// #gls("TUHH") is a good idea.
+#show link: underline
+
 #let glossary = (
   (
     key: "TUHH",
@@ -45,7 +46,7 @@
     Performance profiling is a method of analyzing where execution time is spent. 
     Using profiling tools, it is possible to locate #glspl("PHot", long: false) which are #gls("PHot", long: true). \
     To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
-    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given.
+    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
   ],
   acronyms: [
     #heading(outlined: false)[Glosarry / Acronyms Index]
@@ -74,17 +75,55 @@ The concept of predictive profiling, i. e. predicting the profiling results with
 
 == Motivation
 In the process of iterative code-improvement, badly designed code may be visible early on, for example a long running function with little computational complexity.
-Manually finding #glspl("PHot") in basic concepts as data structures or wrapping abstractions may be less obvious or simply infeasible due to the size of complex programs.
+Manually finding #glspl("PHot") in low level abstractions, for example, data structures or wrapping functions may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
+While it is possible to manually measure function runtime by printing time stamps, it is tedious, error prone, and does not provide information about the summed or average execution time of all collective calls to a function.
+Profilers aim to ease spotting these issues by collecting statistics during the execution and providing a profile used for visualising the performance distribution over the program.
+// https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
+Different visualisation offer specialized insights, _flame graphs_ show a linear overview of functions calls and their hierarchy, which give a general clue what the program is doing as the program execution progesses. A table, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
+
+Profilers do not require any prior implementation so they can applied on any program.
+Since the profile represents a statistical measure of the programs runtime, profiles can be accumulated and compared to indentify changes inbetween runs. This could be used to spot performance regression over multiple versions of a program.
+When runs are performed with different inputs, the profiles could be used to predict the application runtime growth.
+
+Monitoring these information provide a way of identifying and solving a broad spectrum of performance issues before they occur in a critical manner. @bernecky_profiling_1989
+
+
 
 == Usage of electronic tools
-- Typst - General Visualization framework
-- VSCode - Editing && Debugging
-- #gls-short("TUHH") typst ies-report template
-- Google Scholar - Source discovery
-- Generative AI - ChatGPT acquiring topic outline, source discovery
-- Generative AI - Github Copilot code autocomplete, not used for writing passges
+The following tools were used to design, research, write this report in the described extent.
+=== Typst - Typesetting
+Typst is a typsetting language, used here to simplify the design process by providing an underlying system of using templates, styles and citations.
+This report was designed using the #link("https://collaborating.tuhh.de/es/ce/public/tuhh-typst")[ #gls-short("TUHH") typst ies-report template ].
+=== VSCode - Editor
+Visual Studio Code is a general purpose editor, mainly used here to write the report and provide macros and debugging features for Typst.
+=== Git/Jujutsu - Version control
+Jujutsu is a git based version control system, used for tracking changes, proof of work, and backing up the report.
+=== Google Scholar - Research
+Google Scholar a is a search engine used to find the papers and articles this report is founding upon.
+=== Generative AI - LLMs
+Different large language models were used in the creation process.
+
+Different models were also used for general text conversion processes. (E.g converting between languages and formats)
+
+==== ChatGPT
+ChatGPT's "Deep Research" tool was used to generate a sourced, broad #link("https://chatgpt.com/share/6827512a-d998-8008-9d04-14b5d664b1c9", "overview of the topic") and finding articles covering the topic.
+It was also used to generate a quick #link("https://chatgpt.com/share/68275243-c840-8008-b820-8b7fd4110ab8", "summary") of the paper @hu_towards_2025.
+
+==== Github Copilot
+Is a code completion tool, used as a more powerful alternative to verb suggestion or refactoring tools.
+
+=== Other
+TODO:
+- Spellchecking
+- Grammar checking
 
 = Preliminaries
+This sections contains definitions and background information that will be used in the report.
+== Profiling
+In profiling were interested statistical measurements of the function calls in the program including:
+- Call count
+- Call time
+- Call relation 
 
 = Conclusion
 
