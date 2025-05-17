@@ -32,8 +32,25 @@
   (
     key: "HBug",
     short: "heisenbug",
-    long: "heisenberg bug",
-    description: "bug that occurs only while observing the program"
+    long: "Heisenberg bug",
+    description: "A bug that occurs only while observing the program"
+  ),
+  (
+    key: "PMU",
+    short: "PMU",
+    long: "Performance Monitoring Unit",
+    description: "A hardware implementation of monitoring functions"
+  ),
+  (
+    key: "VM",
+    short: "VM",
+    long: "Virtual Machine"
+  ),
+  (
+    key: "PPredict",
+    short: "Predictive Profiling",
+    long: "Predicting Profiling results",
+    description: "A method of predicting performance based on previous profiles"
   )
 )
 #register-glossary(glossary)
@@ -99,7 +116,7 @@ Monitoring these information provide a way of identifying and solving a broad sp
 The following tools were used to design, research, write this report in the described extent.
 === Typst - Typesetting
 Typst is a typsetting language, used here to simplify the design process by providing an underlying system of using templates, styles and citations.
-This report was designed using the #link("https://collaborating.tuhh.de/es/ce/public/tuhh-typst")[ #gls-short("TUHH") typst ies-report template ].
+This report was designed using the #link("https://collaborating.tuhh.de/es/ce/public/tuhh-typst")[ @TUHH typst ies-report template ].
 === VSCode - @IDE
 Visual Studio Code is a general purpose editor, mainly used here to write the report and provide macros and debugging features for Typst.
 === Git/Jujutsu - Version control
@@ -123,6 +140,14 @@ TODO:
 - Spellchecking
 - Grammar checking
 
+= State of the art
+The concept of profiling, i.e the idea of measuring code performance for finding @PHot:pl has been well established since decades.
+Many of the current papers concern themselves discuss the usage of profiling (especially focussing @PMU:pl) in higher abstractions, such as @VM:pl or other cloud deployments. Given the growing importance of GPU computing profiling GPU performance is also focused.
+
+The paper @hu_towards_2025 proposes to integrate dynamic @PPredict into the code writing process, as opposed to measuring existing code and predicting runtime per input growth.
+
+This report (and presentation) aims to convey the idea and usage of profilers in simple context in order to provide the other students with a founding knowledge with these tools.
+
 = Preliminaries
 This sections contains definitions and background information that will be used in the report.
 == Profiling
@@ -141,6 +166,7 @@ Since the program is altered for measuring purposes, its behaviour might change 
 === Sampling (Statistical) Method
 
 === Hypervisors
+
 
 
 = Conclusion
