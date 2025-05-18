@@ -227,12 +227,24 @@ This is achieved by using machine learning on datasets that include c code snipp
 The goal is to give early hints about the performance of new code without going through the "traditional profiling" workflow.
 
 = Tools
+In this sections a selection of profiling tools is shown and compared.
 
 == Profiling
 
 === gprof
+GProf is a profiler using both sampling and instrumentation methods. It provides a precise call count, call relations and approximate call duration from which call time can be inferred
 
-=== linux perf
+The tool was presented in the paper @graham_gprof_1982 and is currently actively maintained.
+
+The instrumentation method is used to track the exact call count and call-site callee relationships. These are tracked using an in memory hash table and can be used to visualize a call graph.
+In order not to intefere with program execution, the call timings are collected using sampling and are presented as accumulated-(total) and individual-, i. e without its descendents(self), time.
+Additionally average times per calls are calculated.
+
+
+TODO: Figure of example output
+TODO: Limitations
+
+=== linux perf/perf_events
 
 === valgrind
 
