@@ -51,6 +51,12 @@
     short: "Predictive Profiling",
     long: "Predicting Profiling results",
     description: "A method of predicting performance based on previous profiles"
+  ),
+  (
+    key: "PC",
+    short: "PC",
+    long: "Program Counter",
+    description: "A processor register that stores the pointer to the next instruction"
   )
 )
 #register-glossary(glossary)
@@ -150,24 +156,95 @@ This report (and presentation) aims to convey the idea and usage of profilers in
 
 = Preliminaries
 This sections contains definitions and background information that will be used in the report.
-== Profiling
+== Profiling <profiling-attr>
 In profiling were interested in statistical measurements of the function calls in the program including:
-- Call count (Total)
-- Call duration - CPU time inside the call including children (Total and per call)
-- Call time usage - CPU time used exclusively in the call (Total and per call)
-- Call relationship/graph - Call stack, for hierarchy visualisation.
-
+/ Call count (Total): Collective count of all calls to this function
+/ Call duration (Totale & per call):  CPU time inside the call including children
+/ Call time usage (Total and per call):  CPU time used exclusively in the call 
+/ Call relationship/graph: Call stack, for hierarchy visualisation.
 
 === Instrumentation Method
 Using this method, code is _instrumented_ by altering existing functions. Depending on the tool, this includes some form of call counter, recording the amount of calls to this function often seperated per individual caller. Timing information can also be approximately collected but is "complicated on time-sharing systems" @graham_gprof_1982
 
-Since the program is altered for measuring purposes, its behaviour might change in terms of performance or in extreme cases also introduce a @HBug
+By recording each profiled function, high frequency functions (e.x wrapping a low level calls) add significant overhead.
+Since the program is altered for measuring purposes, its behaviour changes in terms of performance or in extreme cases also introduce a @HBug @bernecky_profiling_1989
+
+_Note_: For some of these information there exists hardware implementations such as @PMU:pl that externalise the collection process this is less intrusive and more performant.
+
 
 === Sampling (Statistical) Method
+Sampling profilers interrupt the program at regular time intervals and inspecting the @PC and call stack. Execution time of individuals functions can be inferred by distributing the total execution time over the accumulated samples, functions that occur a multitude of times are given a high execution time approximate.
 
-=== Hypervisors
+Since this method inspects only a subset of all function calls, the added overhead is in comparison to other methods negligible.
 
+Given the statistical approach of sampling it is less accurate in providing exact timings. To acquire a representative profile  it is important that the sampling period is chosing accordingly to program runtime. 
+If a program finishes in only a few samples the execution time distribution might become inaccurate.
+If a program is sampled with a frequency so that the actual program is interferred the execution time might not be representative anymore.
+Additional error is also introduced by the execution time of the interrupts.
+@graham_gprof_1982
 
+=== Method Comparison
+
+#figure(
+  table(
+    columns: 4,
+    [Method], [Overhead], [Call timing accuracy], [Performance distribution accuracy],
+    [Instrumentation], [High], [Precise], [Low - added overhead, @HBug:pl],
+    [Sampling], [Low], [Approximate], [High - statistical distribution],
+  ),
+  caption: "Comparision of presented methods"
+)
+
+Depending on which attributes, mentioned in @profiling-attr are of interest, the accuracy of the profiler should be considered.
+Using sampling profilers, the program will run near natively, and a representative profile of performance distribution is obtained. This is useful for identifying @PHot:pl.
+
+Using instrumentation profilers, the program will be significantly slowed in its execution, but one can obtain precise individual function runtimes and call counts. This is useful for quickly verfying implementations. 
+
+== Performance prediction
+This is an advanced usage of profiling, while previously the momentarly performance was measured, performance prediction aim to apply accumulated profiles of different program iterations to predict future performance.
+
+Implementing this idea allows identifying performance issues before they become critical.
+
+=== Input based prediction <input-prediction>
+Given a program that processes inputs of different sizes, it would be beneficial to predict the perfomance growth in relation to the input size.
+
+Individual measurements of different input sizes might be, if badly choosen, unnoticable slower for the executing party.
+Automating these measurements allows to identfy the performance growth and make an accurate prediction of the performance for larger inputs.
+
+=== Performance regression
+Code is often changed over time, either by feature expansion, bug fixes or other changes. While usually the changes are made with improvement in mind, they might introduce performance regression that is overseen in the current usage of the program.
+
+These regression often accumulate over time and are only attended when performance has significantly degraded.
+
+With automated profiling releases can be directly compared to their predecessors for varying input scenarios, this allows to directly notice and identify the cause of the performance regression. @bernecky_profiling_1989
+
+=== Predictive Profiling
+Similar to @input-prediction, predictive profiling aims to provide performance indications without executing the program.
+Instead of basing of previous recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is basing on learned runtimes of individual code snippets, predicting not complete runtime but only runtime of new snippets.
+
+This is achieved by using machine learning on datasets that include c code snippets and their measured runtimes.
+
+The goal is to give early hints about the performance of new code without going through the "traditional profiling" workflow.
+
+= Tools
+
+== Profiling
+
+=== gprof
+
+=== linux perf
+
+=== valgrind
+
+== Visualization
+
+=== Tables
+
+=== Flame graphs
+
+=== Call graphs
+
+== On-the fly profiling
 
 = Conclusion
 
