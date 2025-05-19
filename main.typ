@@ -89,57 +89,57 @@
 
 = Introduction
 
-Improving the performance of a computational program is constant goal in software development, while underlying platforms and abstractions are becoming more optimized, the computational tasks are growing increasingly complex.
+Improving the performance of a computational program is a constant goal in software development. While underlying platforms and abstractions are becoming more optimized, the computational tasks are growing increasingly complex.
 
-Provided with the task of improving runtime, a software designer might take an educated guess or create specific tests to narrow down the hypothesis. Both lack a qualitative assurance, do the tests reflect accurately the performance issue, or describe an entirely different one? @bernecky_profiling_1989
-CPU profiling offers quantitative measurements of runtime associated with specific user symbols, the profiling techniques vary in degree of intrusion, detail and accuracy of measurement.
+Provided with the task of improving runtime, a software designer might take an educated guess or create specific tests to narrow down the hypothesis. Both lack qualitative assurance: do the tests accurately reflect the performance issue, or do they describe an entirely different one? @bernecky_profiling_1989
+CPU profiling offers quantitative measurements of runtime associated with specific user symbols. The profiling techniques vary in degree of intrusion, detail, and accuracy of measurement.
 
 #linebreak()
-This report will describe an overview different profiling tools and their uses.
-Those presented base on an iterative code-improvement cycle:
+This report will describe an overview of different profiling tools and their uses.
+Those presented are based on an iterative code-improvement cycle:
 - Execution using a profiler
-- Analysing results for @PHot:pl
+- Analyzing results for @PHot:pl
 - Inspecting hotspot code for optimization
-The concept of predictive profiling, i. e. predicting the profiling results without compiling the source code, as part of an @IDE will be summarized. @hu_towards_2025
+The concept of predictive profiling, i.e. predicting the profiling results without compiling the source code, as part of an @IDE, will be summarized. @hu_towards_2025
 
 == Motivation
-In the process of iterative code-improvement, badly designed code may be visible early on, for example a long running function with little computational complexity.
-Manually finding @PHot:pl in low level abstractions, for example, data structures or wrapping functions may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
-While it is possible to manually measure function runtime by printing time stamps, it is tedious, error prone, and does not provide information about the summed or average execution time of all collective calls to a function.
-Profilers aim to ease spotting these issues by collecting statistics during the execution and providing a profile used for visualising the performance distribution over the program.
+In the process of iterative code-improvement, badly designed code may be visible early on, for example, a long-running function with little computational complexity.
+Manually finding @PHot:pl in low-level abstractions, for example, data structures or wrapping functions, may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
+While it is possible to manually measure function runtime by printing time stamps, it is tedious, error-prone, and does not provide information about the summed or average execution time of all collective calls to a function.
+Profilers aim to ease spotting these issues by collecting statistics during execution and providing a profile used for visualizing the performance distribution over the program.
 // https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
-Different visualisation offer specialized insights, _flame graphs_ show a linear overview of functions calls and their hierarchy, which give a general clue what the program is doing as the program execution progesses. A table, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
+Different visualizations offer specialized insights. _Flame graphs_ show a linear overview of function calls and their hierarchy, which gives a general clue about what the program is doing as the program execution progresses. A table, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
 
-Profilers do not require any prior implementation so they can applied on any program.
-Since the profile represents a statistical measure of the programs runtime, profiles can be accumulated and compared to indentify changes inbetween runs. This could be used to spot performance regression over multiple versions of a program.
-When runs are performed with different inputs, the profiles could be used to predict the application runtime growth.
+Profilers do not require any prior implementation, so they can be applied to any program.
+Since the profile represents a statistical measure of the program's runtime, profiles can be accumulated and compared to identify changes between runs. This could be used to spot performance regression over multiple versions of a program.
+When runs are performed with different inputs, the profiles could be used to predict the application's runtime growth.
 
-Monitoring these information provide a way of identifying and solving a broad spectrum of performance issues before they occur in a critical manner. @bernecky_profiling_1989
+Monitoring this information provides a way of identifying and solving a broad spectrum of performance issues before they occur in a critical manner. @bernecky_profiling_1989
 
 
 
 == Usage of electronic tools
-The following tools were used to design, research, write this report in the described extent.
+The following tools were used to design, research, and write this report to the described extent.
 === Typst - Typesetting
-Typst is a typsetting language, used here to simplify the design process by providing an underlying system of using templates, styles and citations.
+Typst is a typesetting language, used here to simplify the design process by providing an underlying system for using templates, styles, and citations.
 This report was designed using the #link("https://collaborating.tuhh.de/es/ce/public/tuhh-typst")[ @TUHH typst ies-report template ].
 === VSCode - @IDE
-Visual Studio Code is a general purpose editor, mainly used here to write the report and provide macros and debugging features for Typst.
+Visual Studio Code is a general-purpose editor, mainly used here to write the report and provide macros and debugging features for Typst.
 === Git/Jujutsu - Version control
-Jujutsu is a git based version control system, used for tracking changes, proof of work, and backing up the report.
+Jujutsu is a git-based version control system, used for tracking changes, proof of work, and backing up the report.
 === Google Scholar - Research
-Google Scholar a is a search engine used to find the papers and articles this report is founding upon.
+Google Scholar is a search engine used to find the papers and articles this report is founded upon.
 === Generative AI - LLMs
 Different large language models were used in the creation process.
 
-Different models were also used for general text conversion processes. (E.g converting between languages and formats)
+Different models were also used for general text conversion processes (e.g., converting between languages and formats).
 
 ==== ChatGPT
-ChatGPT's "Deep Research" tool was used to generate a sourced, broad #link("https://chatgpt.com/share/6827512a-d998-8008-9d04-14b5d664b1c9", "overview of the topic") and finding articles covering the topic.
+ChatGPT's "Deep Research" tool was used to generate a broad, sourced #link("https://chatgpt.com/share/6827512a-d998-8008-9d04-14b5d664b1c9", "overview of the topic") and to find articles covering the topic.
 It was also used to generate a quick #link("https://chatgpt.com/share/68275243-c840-8008-b820-8b7fd4110ab8", "summary") of the paper @hu_towards_2025.
 
 ==== Github Copilot
-Is a code completion tool, used as a more powerful alternative to verb suggestion or refactoring tools.
+It is a code completion tool, used as a more powerful alternative to verb suggestion or refactoring tools.
 
 === Other
 TODO:
@@ -147,39 +147,39 @@ TODO:
 - Grammar checking
 
 = State of the art
-The concept of profiling, i.e the idea of measuring code performance for finding @PHot:pl has been well established since decades.
-Many of the current papers concern themselves discuss the usage of profiling (especially focussing @PMU:pl) in higher abstractions, such as @VM:pl or other cloud deployments. Given the growing importance of GPU computing profiling GPU performance is also focused.
+The concept of profiling, i.e., the idea of measuring code performance for finding @PHot:pl, has been well established for decades.
+Many of the current papers discuss the usage of profiling (especially focusing on @PMU:pl) in higher abstractions, such as @VM:pl or other cloud deployments. Given the growing importance of GPU computing, profiling GPU performance is also a focus.
 
 The paper @hu_towards_2025 proposes to integrate dynamic @PPredict into the code writing process, as opposed to measuring existing code and predicting runtime per input growth.
 
-This report (and presentation) aims to convey the idea and usage of profilers in simple context in order to provide the other students with a founding knowledge with these tools.
+This report (and presentation) aims to convey the idea and usage of profilers in a simple context in order to provide the other students with foundational knowledge of these tools.
 
 = Preliminaries
-This sections contains definitions and background information that will be used in the report.
+This section contains definitions and background information that will be used in the report.
 == Profiling <profiling-attr>
-In profiling were interested in statistical measurements of the function calls in the program including:
+In profiling, we're interested in statistical measurements of the function calls in the program, including:
 / Call count (Total): Collective count of all calls to this function
-/ Call duration (Total & per call):  CPU time inside the call including children
-/ Call time usage (Total and per call):  CPU time used exclusively in the call 
-/ Call relationship/graph: Call stack, for hierarchy visualisation.
+/ Call duration (Total & per call): CPU time inside the call including children
+/ Call time usage (Total and per call): CPU time used exclusively in the call
+/ Call relationship/graph: Call stack, for hierarchy visualization.
 
 === Instrumentation Method
-Using this method, code is _instrumented_ by altering existing functions. Depending on the tool, this includes some form of call counter, recording the amount of calls to this function often seperated per individual caller. Timing information can also be approximately collected but is "complicated on time-sharing systems" @graham_gprof_1982
+Using this method, code is _instrumented_ by altering existing functions. Depending on the tool, this includes some form of call counter, recording the number of calls to this function, often separated per individual caller. Timing information can also be approximately collected but is "complicated on time-sharing systems" @graham_gprof_1982
 
-By recording each profiled function, high frequency functions (e.x wrapping a low level calls) add significant overhead.
-Since the program is altered for measuring purposes, its behaviour changes in terms of performance or in extreme cases also introduce a @HBug @bernecky_profiling_1989
+By recording each profiled function, high-frequency functions (e.g., wrapping low-level calls) add significant overhead.
+Since the program is altered for measuring purposes, its behaviour changes in terms of performance or, in extreme cases, also introduces a @HBug @bernecky_profiling_1989
 
-_Note_: For some of these information there exists hardware implementations such as @PMU:pl that externalise the collection process this is less intrusive and more performant.
+_Note_: For some of this information, there exist hardware implementations such as @PMU:pl that externalize the collection process. This is less intrusive and more performant.
 
 
 === Sampling (Statistical) Method
-Sampling profilers interrupt the program at regular time intervals and inspecting the @PC and call stack. Execution time of individuals functions can be inferred by distributing the total execution time over the accumulated samples, functions that occur a multitude of times are given a high execution time approximate.
+Sampling profilers interrupt the program at regular time intervals and inspect the @PC and call stack. Execution time of individual functions can be inferred by distributing the total execution time over the accumulated samples, functions that occur a multitude of times are given a high execution time approximate.
 
-Since this method inspects only a subset of all function calls, the added overhead is in comparison to other methods negligible.
+Since this method inspects only a subset of all function calls, the added overhead is negligible in comparison to other methods.
 
-Given the statistical approach of sampling it is less accurate in providing exact timings. To acquire a representative profile  it is important that the sampling period is chosing accordingly to program runtime. 
-If a program finishes in only a few samples the execution time distribution might become inaccurate.
-If a program is sampled with a frequency so that the actual program is interferred the execution time might not be representative anymore.
+Given the statistical approach of sampling, it is less accurate in providing exact timings. To acquire a representative profile, it is important that the sampling period is chosen according to program runtime.
+If a program finishes in only a few samples, the execution time distribution might become inaccurate.
+If a program is sampled with a frequency so that the actual program is interfered with, the execution time might not be representative anymore.
 Additional error is also introduced by the execution time of the interrupts.
 @graham_gprof_1982
 
@@ -192,64 +192,64 @@ Additional error is also introduced by the execution time of the interrupts.
     [Instrumentation], [High], [Precise], [Low - added overhead, @HBug:pl],
     [Sampling], [Low], [Approximate], [High - statistical distribution],
   ),
-  caption: "Comparision of presented methods"
+  caption: "Comparison of presented methods"
 )
 
-Depending on which attributes, mentioned in @profiling-attr are of interest, the accuracy of the profiler should be considered.
+Depending on which attributes, mentioned in @profiling-attr, are of interest, the accuracy of the profiler should be considered.
 Using sampling profilers, the program will run near natively, and a representative profile of performance distribution is obtained. This is useful for identifying @PHot:pl.
 
-Using instrumentation profilers, the program will be significantly slowed in its execution, but one can obtain precise individual function runtimes and call counts. This is useful for quickly verfying implementations. 
+Using instrumentation profilers, the program will be significantly slowed in its execution, but one can obtain precise individual function runtimes and call counts. This is useful for quickly verifying implementations.
 
 == Performance prediction
-This is an advanced usage of profiling, while previously the momentarly performance was measured, performance prediction aim to apply accumulated profiles of different program iterations to predict future performance.
+This is an advanced usage of profiling. While previously the momentary performance was measured, performance prediction aims to apply accumulated profiles of different program iterations to predict future performance.
 
 Implementing this idea allows identifying performance issues before they become critical.
 
 === Input based prediction <input-prediction>
-Given a program that processes inputs of different sizes, it would be beneficial to predict the perfomance growth in relation to the input size.
+Given a program that processes inputs of different sizes, it would be beneficial to predict the performance growth in relation to the input size.
 
-Individual measurements of different input sizes might be, if badly choosen, unnoticable slower for the executing party.
-Automating these measurements allows to identfy the performance growth and make an accurate prediction of the performance for larger inputs.
+Individual measurements of different input sizes might be, if badly chosen, unnoticeably slower for the executing party.
+Automating these measurements allows identifying the performance growth and making an accurate prediction of the performance for larger inputs.
 
 === Performance regression
-Code is often changed over time, either by feature expansion, bug fixes or other changes. While usually the changes are made with improvement in mind, they might introduce performance regression that is overseen in the current usage of the program.
+Code is often changed over time, either by feature expansion, bug fixes, or other changes. While usually the changes are made with improvement in mind, they might introduce performance regression that is overlooked in the current usage of the program.
 
-These regression often accumulate over time and are only attended when performance has significantly degraded.
+These regressions often accumulate over time and are only attended to when performance has significantly degraded.
 
-With automated profiling releases can be directly compared to their predecessors for varying input scenarios, this allows to directly notice and identify the cause of the performance regression. @bernecky_profiling_1989
+With automated profiling, releases can be directly compared to their predecessors for varying input scenarios. This allows one to directly notice and identify the cause of the performance regression. @bernecky_profiling_1989
 
 === Predictive Profiling
 Similar to @input-prediction, predictive profiling aims to provide performance indications without executing the program.
-Instead of basing of previous recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is basing on learned runtimes of individual code snippets, predicting not complete runtime but only runtime of new snippets.
+Instead of basing on previously recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is based on learned runtimes of individual code snippets, predicting not the complete runtime but only the runtime of new snippets.
 
-This is achieved by using machine learning on datasets that include c code snippets and their measured runtimes.
+This is achieved by using machine learning on datasets that include C code snippets and their measured runtimes.
 
 The goal is to give early hints about the performance of new code without going through the "traditional profiling" workflow.
 
 = Tools
-In this sections a selection of profiling tools is shown and compared.
+In this section, a selection of profiling tools is shown and compared.
 
 == Profiling
-Using the tools usually involves compiling the code with flags, so that the function names can be recognized in the profile, and running the executable with the profiler or attaching the profiler to a running process this produces a profile which can later be visualized, either by the profiler itself or an external tool.
+Using the tools usually involves compiling the code with flags so that the function names can be recognized in the profile, and running the executable with the profiler or attaching the profiler to a running process. This produces a profile which can later be visualized, either by the profiler itself or an external tool.
 
 === gprof
-GProf is a profiler using both sampling and instrumentation methods. It provides a precise call count, call relations and approximate call duration from which call time can be inferred
+GProf is a profiler using both sampling and instrumentation methods. It provides a precise call count, call relations, and approximate call duration from which call time can be inferred.
 
 The tool was presented in the paper @graham_gprof_1982 and is currently actively maintained.
 
-The instrumentation method is used to track the exact call count and call-site callee relationships. These are tracked using an in memory hash table and can be used to visualize a call graph.
-In order not to intefere with program execution, the call timings are collected using sampling and are presented as accumulated-(total) and individual-, i. e without its descendents(self), time.
-Additionally average times per calls are calculated.
+The instrumentation method is used to track the exact call count and call-site callee relationships. These are tracked using an in-memory hash table and can be used to visualize a call graph.
+In order not to interfere with program execution, the call timings are collected using sampling and are presented as accumulated-(total) and individual-, i.e., without its descendants (self), time.
+Additionally, average times per call are calculated.
 
 ==== Limitations and Drawbacks
-The added instrumentation (`-pg` flags) still adds a significant overhead. (Which can be observed by profiling the instrumented binary as in @perf).
+The added instrumentation (`-pg` flags) still adds significant overhead (which can be observed by profiling the instrumented binary as in @perf).
 
-GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982 as well as multi-threaded applications.
+GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982 as well as multithreaded applications.
 
 ==== Example
-The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D rid to the nearest wall and prints a column with according height, resulting in a 3D view.
+The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D grid to the nearest wall and prints a column with the corresponding height, resulting in a 3D view.
 
-For collecting the profile, the program was compiled with `gcc` and `-pg` flags and run `gprof ./solution gmon.out`.
+For collecting the profile, the program was compiled with `gcc` and `-pg` flags and run as `gprof ./solution gmon.out`.
 #figure(
 [
   ```
@@ -285,26 +285,26 @@ For collecting the profile, the program was compiled with `gcc` and `-pg` flags 
 
 #v(5%)
 
-The profile shows that the high amounts of execution time are spent in `raycast`, `get_object` and `valid_coordinates`.
-This (knowing the program) indicates that the optimizing the `raycast` loop would speed up runtime, and (knowing) that `get_object` is essentially a wrapper calling `valid_coordinates` which is a sanity check that should not occur, both of these function might be entirely removed or at least optimized.
+The profile shows that high amounts of execution time are spent in `raycast`, `get_object`, and `valid_coordinates`.
+This (knowing the program) indicates that optimizing the `raycast` loop would speed up runtime, and (knowing) that `get_object` is essentially a wrapper calling `valid_coordinates`, which is a sanity check that should not occur; both of these functions might be entirely removed or at least optimized.
 
-After any optimization efforts, the program should be profiled again to verify for improvements.
+After any optimization efforts, the program should be profiled again to verify improvements.
 
 === linux perf/perf_events <perf>
-Perf is a profiler part of the linux kernel, it is using syscalls to collect application (or system wide) CPU performance statistics.
+Perf is a profiler that is part of the Linux kernel; it uses syscalls to collect application (or system-wide) CPU performance statistics.
 It does not require any additional compilation flags.
 
-For collecting a profile the program is run with `perf record ./solution` and the profile is later visualized using `perf report`.
-The standard output is similar to gprof, excluding the call graph, but offering detailed insight on the functions durations by their assembly instruction.
-Perf does provide a broad access to different hardware events, such as cache statistics or context switches.
+For collecting a profile, the program is run with `perf record ./solution` and the profile is later visualized using `perf report`.
+The standard output is similar to gprof, excluding the call graph, but offers detailed insight on the functions' durations by their assembly instruction.
+Perf does provide broad access to different hardware events, such as cache statistics or context switches.
 
 ==== Example
-As we can observe in @gprof-output and @perf-output, the @PHot:pl are still `raycast`, `get_object` and `valid_coordinates` in relation they show the same performance difference as in @gprof-output, yet the total % time differ.
+As we can observe in @gprof-output and @perf-output, the @PHot:pl are still `raycast`, `get_object`, and `valid_coordinates`. In relation, they show the same performance difference as in @gprof-output, yet the total % time differs.
 
 This is caused by:
-- Perf profiling more external events, while gprof is limited to the code that was compiled.
-- GProf not accounting for its own instrumentation code, while Perf includes performance for the syscalls.
-- Generally the output here beign truncated to display only the major functions.
+- Perf profiles more external events, while gprof is limited to the code that was compiled.
+- GProf does not account for its own instrumentation code, while Perf includes the performance of the syscalls.
+- Generally, the output here is being truncated to display only the major functions.
 #v(1fr)
 
 #figure(
@@ -363,7 +363,7 @@ raycast  /home/lennart/terminal-raycasting/solution [Percent: local period]
    0.01 │       mov       -0x70(%rbp),%rax
 ...
 ```,
-caption: [Example of assembly performance analysation]
+caption: [Example of assembly performance analysis]
 )
 
 === valgrind
@@ -372,9 +372,9 @@ Skip(?), TODO
 == Visualization
 
 === Tables
-A tabular representation like the the flat profile @gprof-output offer represents how much time is spent in what symbols. This is useful for quickly identifying @PHot:pl.
+A tabular representation like the flat profile @gprof-output offers represents how much time is spent in which symbols. This is useful for quickly identifying @PHot:pl.
 
-Note that due to the amount of symbols, low time functions might be hidden or entirely missing due to the statistical nature of sampling.
+Note that due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
 
@@ -383,22 +383,22 @@ TODO
 TODO
 
 = On-the fly profiling
-This section will describe a conceptual development tool that builds upon profiling, the idea, implementation, usage and limitations of this tool will be reviewed.
+This section will describe a conceptual development tool that builds upon profiling, the idea, implementation, usage, and limitations of this tool will be reviewed.
 
 == Motivation
-The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individudally, but especially for large programs, that are not feasible to build and run iteratively, this workflow can become slow.
+The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individually, but especially for large programs, that are not feasible to build and run iteratively, this workflow can become slow.
 
-The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i. e without any compilation or execution, while coding, visualised by the @IDE).
+The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i.e., without any compilation or execution, while coding, visualized by the @IDE).
 
 == Introduction
-With increasing layers of abstraction it becomes harder to have deep understanding of the performance impact of specific decisions.
-Profilers, used correctly, can give a general notion of how much time is spent in what area of the implementation. As any other toolset, profiliers must be learned to be used efficiently.
+With increasing layers of abstraction, it becomes harder to have a deep understanding of the performance impact of specific decisions.
+Profilers, used correctly, can give a general notion of how much time is spent in what area of the implementation. As with any other toolset, profilers must be learned to be used efficiently.
 
-Even then optimizing a @PHot might not be a clear task, say the goal is to optimize appending data to a list, if the list is sorted, perhaps the sorting comparison criterea takes a lot of time.
+Even then, optimizing a @PHot might not be a clear task. Say the goal is to optimize appending data to a list; if the list is sorted, perhaps the sorting comparison criteria take a lot of time.
 It could also be the case that the CPU cannot be fully utilized as linked-list traversal stages require memory fetching to pass before the next comparison can take place.
 This requires a deep understanding or precise profiling to figure out where time is spent inefficiently.
 
-_On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent, this is based on categories introduced in @yasin_top-down_2014.
+_On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
 
 
 
