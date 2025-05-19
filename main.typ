@@ -380,6 +380,9 @@ Note that due to the amount of symbols, low time functions might be hidden or en
 === Call graphs
 
 = On-the fly profiling
+The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individudally, but especially for large programs that are not feasible to build and run iteratively this workflow can become slow.
+
+The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i. e without any compilation or execution, while coding visualised by the @IDE).
 
 
 
