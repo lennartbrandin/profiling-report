@@ -230,7 +230,7 @@ The goal is to give early hints about the performance of new code without going 
 In this sections a selection of profiling tools is shown and compared.
 
 == Profiling
-Using the tools usually involves compiling the code with flags, so that the function names can be recognized in the profile, and running the executable with the profiler or attaching the profiler to a running process.
+Using the tools usually involves compiling the code with flags, so that the function names can be recognized in the profile, and running the executable with the profiler or attaching the profiler to a running process this produces a profile which can later be visualized, either by the profiler itself or an external tool.
 
 === gprof
 GProf is a profiler using both sampling and instrumentation methods. It provides a precise call count, call relations and approximate call duration from which call time can be inferred
@@ -241,9 +241,15 @@ The instrumentation method is used to track the exact call count and call-site c
 In order not to intefere with program execution, the call timings are collected using sampling and are presented as accumulated-(total) and individual-, i. e without its descendents(self), time.
 Additionally average times per calls are calculated.
 
+==== Limitations and Drawbacks
+The added instrumentation (`-pg` flags) still adds a significant overhead. (Which can be observed by profiling the instrumented binary as in @perf).
+
+GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982 as well as multi-threaded applications.
+
 ==== Example
 The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D rid to the nearest wall and prints a column with according height, resulting in a 3D view.
 
+For collecting the profile, the program was compiled with `gcc` and `-pg` flags and run `gprof ./solution gmon.out`.
 #figure(
 [
   ```
@@ -262,13 +268,14 @@ The example @gprof-output is a profile of a small raycasting project, which calc
     0.51      1.97     0.01   122400     0.00     0.00  v_length
     0.00      1.97     0.00   122400     0.00     0.00  v_sub
     0.00      1.97     0.00   110666     0.00     0.00  set_terminal
+...
   ```
 ],
   caption: [GProf output of a #link("https://github.com/lennartbrandin/terminal-raycasting", [raycasting project]), Flat profile sorted by self seconds - proportional to time%]
 ) <gprof-output>
 
 *Legend:*
-/ Time: percentage of total time
+/ Time: % of total time
 / Cumulative (sec): accumulated CPU time in this function and all listed above
 / Self (sec): accumulated call time
 / Calls: Number of calls
@@ -276,28 +283,105 @@ The example @gprof-output is a profile of a small raycasting project, which calc
 / total ms/call: Average call duration (call time + children)
 / name: Function name
 
-#pagebreak()
+#v(5%)
 
 The profile shows that the high amounts of execution time are spent in `raycast`, `get_object` and `valid_coordinates`.
 This (knowing the program) indicates that the optimizing the `raycast` loop would speed up runtime, and (knowing) that `get_object` is essentially a wrapper calling `valid_coordinates` which is a sanity check that should not occur, both of these function might be entirely removed or at least optimized.
 
 After any optimization efforts, the program should be profiled again to verify for improvements.
 
-=== linux perf/perf_events
+=== linux perf/perf_events <perf>
 Perf is a profiler part of the linux kernel, it is using syscalls to collect application (or system wide) CPU performance statistics.
+It does not require any additional compilation flags.
 
+For collecting a profile the program is run with `perf record ./solution` and the profile is later visualized using `perf report`.
+The standard output is similar to gprof, excluding the call graph, but offering detailed insight on the functions durations by their assembly instruction.
+Perf does provide a broad access to different hardware events, such as cache statistics or context switches.
+
+==== Example
+As we can observe in @gprof-output and @perf-output, the @PHot:pl are still `raycast`, `get_object` and `valid_coordinates` in relation they show the same performance difference as in @gprof-output, yet the total % time differ.
+
+This is caused by:
+- Perf profiling more external events, while gprof is limited to the code that was compiled.
+- GProf not accounting for its own instrumentation code, while Perf includes performance for the syscalls.
+- Generally the output here beign truncated to display only the major functions.
+#v(1fr)
+
+#figure(
+```
+Samples: 24K of event 'cycles:P', Event count (approx.): 5875520885
+Overhead  Command   Shared Object         Symbol
+  24.53%  solution  solution              [.] raycast
+  13.33%  solution  solution              [.] get_object
+   9.50%  solution  libm.so.6             [.] 0x000000000007eef4
+   9.49%  solution  solution              [.] valid_coordinates
+   5.00%  solution  [kernel.kallsyms]     [k] syscall_return_via_sysret
+   4.24%  solution  [kernel.kallsyms]     [k] entry_SYSRETQ_unsafe_stack
+   2.93%  solution  libm.so.6             [.] 0x000000000007eef0
+   2.73%  solution  [kernel.kallsyms]     [k] entry_SYSCALL_64_after_hwframe
+   2.48%  solution  libc.so.6             [.] putchar
+   1.91%  solution  solution              [.] floor@plt
+   1.79%  solution  libc.so.6             [.] _IO_file_overflow
+   1.77%  solution  [kernel.kallsyms]     [k] entry_SYSCALL_64
+   1.46%  solution  solution              [.] render_frame
+   0.90%  solution  [kernel.kallsyms]     [k] n_tty_write
+   0.86%  solution  solution              [.] construct_frame_column
+   0.77%  solution  libm.so.6             [.] 0x000000000007eefa
+   0.69%  solution  [kernel.kallsyms]     [k] n_tty_set_termios
+...
+```,
+caption: [Example of `perf report`]
+) <perf-output>
+/ Overhead: % of total time
+/ Command: profiled command (here just the binary)
+/ Shared Object: Function source
+/ Symbol: Function name (Or address in case of missing names)
+#v(1fr)
+
+#figure(
+```
+Samples: 24K of event 'cycles:P', 4000 Hz, Event count (approx.): 5875520885
+raycast  /home/lennart/terminal-raycasting/solution [Percent: local period]
+   1.47 │       mov       -0x20(%rbp),%rax
+   2.50 │       movq      %rax,%xmm0
+   2.00 │     → call      floor@plt
+  14.82 │       cvttsd2si %xmm0,%ecx
+   0.22 │       mov       -0x68(%rbp),%rax
+   1.52 │       mov       %ebx,%edx
+   0.17 │       mov       %ecx,%esi
+   2.36 │       mov       %rax,%rdi
+   1.97 │     → call      get_object
+   3.28 │       mov       %rax,-0x30(%rbp)
+   6.42 │       mov       -0x30(%rbp),%rax
+  25.16 │       movb      $0x1,0x3(%rax)
+   0.43 │       mov       -0x30(%rbp),%rax
+   1.32 │       movzbl    0x1(%rax),%eax
+        │       test      %al,%al
+   1.01 │     ↑ jne       106
+   0.22 │       movsd     -0x20(%rbp),%xmm2
+   0.03 │       movsd     -0x18(%rbp),%xmm0
+   0.01 │       mov       -0x70(%rbp),%rax
+...
+```,
+caption: [Example of assembly performance analysation]
+)
 
 === valgrind
 
 == Visualization
 
 === Tables
+A tabular representation like the the flat profile @gprof-output offer represents how much time is spent in what symbols. This is useful for quickly identifying @PHot:pl.
+
+Note that due to the amount of symbols, low time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
 
 === Call graphs
 
-== On-the fly profiling
+= On-the fly profiling
+
+
 
 = Conclusion
 
