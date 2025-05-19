@@ -68,8 +68,8 @@
   academic-grade: none,
   institute: "Debugging – Methodology instead of Confusion",
   date: datetime(year: 2025, month: 5, day: 11),
-  first-examiner: none,
-  second-examiner: none,
+  first-examiner: "Danylo Kozak",
+  second-examiner: "Prof. Görschwin Fey",
   supervisor: none,
   abstract: [
     Performance profiling is a method of analyzing where execution time is spent. 
@@ -89,9 +89,9 @@
 
 = Introduction
 
-Improving the perfomance of a computational program is consistent goal in software development, while underlying platforms and abstractions are becoming more optimized, the computational tasks are growing increasingly complex.
+Improving the performance of a computational program is constant goal in software development, while underlying platforms and abstractions are becoming more optimized, the computational tasks are growing increasingly complex.
 
-Provided with the task of improving runtime, a software designer might take an educated guess or create specific tests to narrow down the hypothesis. Both lack a qualitative assurance, do the tests reflect accurately the performance issue or describe an entirely different performance issue? @bernecky_profiling_1989
+Provided with the task of improving runtime, a software designer might take an educated guess or create specific tests to narrow down the hypothesis. Both lack a qualitative assurance, do the tests reflect accurately the performance issue, or describe an entirely different one? @bernecky_profiling_1989
 CPU profiling offers quantitative measurements of runtime associated with specific user symbols, the profiling techniques vary in degree of intrusion, detail and accuracy of measurement.
 
 #linebreak()
@@ -367,6 +367,7 @@ caption: [Example of assembly performance analysation]
 )
 
 === valgrind
+Skip(?), TODO
 
 == Visualization
 
@@ -377,12 +378,27 @@ Note that due to the amount of symbols, low time functions might be hidden or en
 
 === Flame graphs
 
+TODO
 === Call graphs
+TODO
 
 = On-the fly profiling
-The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individudally, but especially for large programs that are not feasible to build and run iteratively this workflow can become slow.
+This section will describe a conceptual development tool that builds upon profiling, the idea, implementation, usage and limitations of this tool will be reviewed.
 
-The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i. e without any compilation or execution, while coding visualised by the @IDE).
+== Motivation
+The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individudally, but especially for large programs, that are not feasible to build and run iteratively, this workflow can become slow.
+
+The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i. e without any compilation or execution, while coding, visualised by the @IDE).
+
+== Introduction
+With increasing layers of abstraction it becomes harder to have deep understanding of the performance impact of specific decisions.
+Profilers, used correctly, can give a general notion of how much time is spent in what area of the implementation. As any other toolset, profiliers must be learned to be used efficiently.
+
+Even then optimizing a @PHot might not be a clear task, say the goal is to optimize appending data to a list, if the list is sorted, perhaps the sorting comparison criterea takes a lot of time.
+It could also be the case that the CPU cannot be fully utilized as linked-list traversal stages require memory fetching to pass before the next comparison can take place.
+This requires a deep understanding or precise profiling to figure out where time is spent inefficiently.
+
+_On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent, this is based on categories introduced in @yasin_top-down_2014.
 
 
 
