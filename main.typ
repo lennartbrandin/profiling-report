@@ -159,7 +159,7 @@ This sections contains definitions and background information that will be used 
 == Profiling <profiling-attr>
 In profiling were interested in statistical measurements of the function calls in the program including:
 / Call count (Total): Collective count of all calls to this function
-/ Call duration (Totale & per call):  CPU time inside the call including children
+/ Call duration (Total & per call):  CPU time inside the call including children
 / Call time usage (Total and per call):  CPU time used exclusively in the call 
 / Call relationship/graph: Call stack, for hierarchy visualisation.
 
@@ -230,6 +230,7 @@ The goal is to give early hints about the performance of new code without going 
 In this sections a selection of profiling tools is shown and compared.
 
 == Profiling
+Using the tools usually involves compiling the code with flags, so that the function names can be recognized in the profile, and running the executable with the profiler or attaching the profiler to a running process.
 
 === gprof
 GProf is a profiler using both sampling and instrumentation methods. It provides a precise call count, call relations and approximate call duration from which call time can be inferred
@@ -240,11 +241,51 @@ The instrumentation method is used to track the exact call count and call-site c
 In order not to intefere with program execution, the call timings are collected using sampling and are presented as accumulated-(total) and individual-, i. e without its descendents(self), time.
 Additionally average times per calls are calculated.
 
+==== Example
+The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D rid to the nearest wall and prints a column with according height, resulting in a 3D view.
 
-TODO: Figure of example output
-TODO: Limitations
+#figure(
+[
+  ```
+  Each sample counts as 0.01 seconds.
+    %   cumulative   self              self     total           
+   time   seconds   seconds    calls  ms/call  ms/call  name    
+   47.75      0.94     0.94      544     1.73     3.29  raycast
+   25.91      1.45     0.51 51479843     0.00     0.00  get_object
+   12.70      1.70     0.25 51481719     0.00     0.00  valid_coordinates
+    5.08      1.80     0.10      544     0.18     0.18  render_frame
+    4.06      1.88     0.08                             _init
+    1.52      1.91     0.03   122400     0.00     0.00  construct_frame_column
+    1.52      1.94     0.03      544     0.06     0.06  print_field
+    0.51      1.95     0.01   367622     0.00     0.00  deg_to_rad
+    0.51      1.96     0.01   122400     0.00     0.00  v_dist
+    0.51      1.97     0.01   122400     0.00     0.00  v_length
+    0.00      1.97     0.00   122400     0.00     0.00  v_sub
+    0.00      1.97     0.00   110666     0.00     0.00  set_terminal
+  ```
+],
+  caption: [GProf output of a #link("https://github.com/lennartbrandin/terminal-raycasting", [raycasting project]), Flat profile sorted by self seconds - proportional to time%]
+) <gprof-output>
+
+*Legend:*
+/ Time: percentage of total time
+/ Cumulative (sec): accumulated CPU time in this function and all listed above
+/ Self (sec): accumulated call time
+/ Calls: Number of calls
+/ self ms/call: Average call time
+/ total ms/call: Average call duration (call time + children)
+/ name: Function name
+
+#pagebreak()
+
+The profile shows that the high amounts of execution time are spent in `raycast`, `get_object` and `valid_coordinates`.
+This (knowing the program) indicates that the optimizing the `raycast` loop would speed up runtime, and (knowing) that `get_object` is essentially a wrapper calling `valid_coordinates` which is a sanity check that should not occur, both of these function might be entirely removed or at least optimized.
+
+After any optimization efforts, the program should be profiled again to verify for improvements.
 
 === linux perf/perf_events
+Perf is a profiler part of the linux kernel, it is using syscalls to collect application (or system wide) CPU performance statistics.
+
 
 === valgrind
 
