@@ -356,30 +356,101 @@ raycast  /home/lennart/terminal-raycasting/solution [Percent: local period]
 ...
 ```,
 caption: [Example of assembly performance analysis]
-)
-
-=== valgrind
-Skip(?), TODO
+) <perf-assembly>
 
 == Visualization
 
 Different visualizations offer specialized insights.
 
-_Flame graphs_ show a linear overview of function calls and their hierarchy, which gives a general clue about what the program is doing as the program execution progresses.
+_Flame graphs_ show an accumulated overview of function calls and their hierarchy, which gives a general clue about what the program is doing as the program execution progresses.
 
 A _table_, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
 
 === Tables
-A tabular representation like the flat profile @gprof-output offers represents how much time is spent in which symbols. This is useful for quickly identifying @PHot:pl.
+A tabular representation like the flat profile @gprof-output offers represents how much time is spent in which symbols.
+This is useful for quickly identifying @PHot:pl.
+
+These can be obtained directly from `gprof` or `perf report`.
 
 Note that due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
 // https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
 
-TODO
+Flame graphs can be produced using an external tool, such as Brendan Gregg's FlameGraph tool (#link("https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html", "Description & Instructions")), these operate on a already collected profile, such as the one from `perf` or `gprof`.
+
+#figure(
+  image("flamegraph.svg"),
+  caption: [
+    Raycasting flamegraph, showing the call hierarchy and time distribution.
+
+    *Note*: The coloring is merely aesthetic and not informational.
+  ]
+) <flamegraph>
+
+They give an hierarchical overview of the call stack, accumulating time spent in each child function.
+The width represents the amount of time spent in the function (and children), while calls made are stacked on top.
+
+This allows to identify @PHot:pl, as wide bars with no children indicate that the function is consuming a lot of time.
+The flamegraph in @flamegraph shows @PHot:pl in the user code `raycast`, `get_object`, and `valid_coordinates` and in external code `[libm.so.6]`.
+(Knowing the code) and looking (or asking ChatGPT) at the assembly code @perf-assembly, it becomes clear that double to int conversion, flooring operation and calls to short functions (`get_object` and `valid_coordinates`) take a lot of overhead.
+
 === Call graphs
-TODO
+Call graphs are similar to the tabular representation, but given per function each. 
+The rows (per entry) contain all parents (above the function itself), the function itself (the row providing index and time%) and all children (below the function).
+
+It is possible to see which children make up most of the time, and for how many of the total nr. of calls the parent is responsble for.
+
+/ index: The number given to the function (Sorted by time%)
+/ time%: % of program runtime spent in this function and children
+/ self: time(seconds) of runtime spent in this function
+/ children: time(seconds) of runtime spent in this function and children
+/ called (self/total): Nr. of calls to this child (self/total), or by this parent
+/ name: Child/Parent name
+
+
+#v(1%)
+
+#figure(
+```
+granularity: each sample hit covers 2 byte(s) for 0.66% of 1.51 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     94.7    0.00    1.43                 main [1]
+                0.59    0.73     501/501         raycast [2]
+                0.10    0.00     501/501         render_frame [5]
+                0.00    0.01     501/501         move [13]
+                0.00    0.00     776/50876       kb_hit [12]
+                0.00    0.00       1/1           initialize_game [19]
+                0.00    0.00     590/590         ms_mov [24]
+                0.00    0.00     501/501         turn [25]
+                0.00    0.00       1/1           open_files [30]
+                0.00    0.00       1/1           init_screen [29]
+                0.00    0.00       1/1           destroy_screen [27]
+                0.00    0.00       1/1           free_field [28]
+                0.00    0.00       1/1           close_files [26]
+-----------------------------------------------
+                0.59    0.73     501/501         main [1]
+[2]     87.4    0.59    0.73     501         raycast [2]
+                0.46    0.16 41959892/42537746     get_object [3]
+                0.04    0.00  112725/112725      construct_frame_column [7]
+                0.03    0.00  112725/112725      v_dist [8]
+                0.02    0.00     501/501         print_field [9]
+                0.01    0.00  338175/338575      deg_to_rad [10]
+                0.00    0.00     501/501         reset_ray_hits [15]
+-----------------------------------------------
+                0.00    0.00     201/42537746     valid_position [17]
+                0.00    0.00  288576/42537746     reset_ray_hits [15]
+                0.00    0.00  289077/42537746     print_field [9]
+                0.46    0.16 41959892/42537746     raycast [2]
+[3]     42.1    0.47    0.17 42537746         get_object [3]
+                0.17    0.00 42537746/42539525     valid_coordinates [4]
+```,
+  caption: "Partial output of Gprof's call graph"
+) <gprof-callgraph>
+
+E.g in @gprof-callgraph `main [1]` all children are only called exclusivly by itself, while `get_object [3]` is called mostly by `raycast [2]` and a few times by `valid_position`.
 
 = On-the fly profiling
 This section will describe a conceptual development tool that builds upon profiling, the idea, implementation, usage, and limitations of this tool will be reviewed.
@@ -398,7 +469,6 @@ It could also be the case that the CPU cannot be fully utilized as linked-list t
 This requires a deep understanding or precise profiling to figure out where time is spent inefficiently.
 
 _On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
-
 
 
 = Conclusion
