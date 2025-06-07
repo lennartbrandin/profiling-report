@@ -107,8 +107,6 @@ In the process of iterative code-improvement, badly designed code may be visible
 Manually finding @PHot:pl in low-level abstractions, for example, data structures or wrapping functions, may be less obvious or simply infeasible due to the size and spread of function calls in complex programs.
 While it is possible to manually measure function runtime by printing time stamps, it is tedious, error-prone, and does not provide information about the summed or average execution time of all collective calls to a function.
 Profilers aim to ease spotting these issues by collecting statistics during execution and providing a profile used for visualizing the performance distribution over the program.
-// https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
-Different visualizations offer specialized insights. _Flame graphs_ show a linear overview of function calls and their hierarchy, which gives a general clue about what the program is doing as the program execution progresses. A table, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
 
 Profilers do not require any prior implementation, so they can be applied to any program.
 Since the profile represents a statistical measure of the program's runtime, profiles can be accumulated and compared to identify changes between runs. This could be used to spot performance regression over multiple versions of a program.
@@ -134,17 +132,9 @@ Different large language models were used in the creation process.
 
 Different models were also used for general text conversion processes (e.g., converting between languages and formats).
 
-==== ChatGPT
-ChatGPT's "Deep Research" tool was used to generate a broad, sourced #link("https://chatgpt.com/share/6827512a-d998-8008-9d04-14b5d664b1c9", "overview of the topic") and to find articles covering the topic.
-It was also used to generate a quick #link("https://chatgpt.com/share/68275243-c840-8008-b820-8b7fd4110ab8", "summary") of the paper @hu_towards_2025.
+- ChatGPT ChatGPT's "Deep Research" tool was used to generate a broad, sourced #link("https://chatgpt.com/share/6827512a-d998-8008-9d04-14b5d664b1c9", "overview of the topic") and to find articles covering the topic. It was also used to generate a quick #link("https://chatgpt.com/share/68275243-c840-8008-b820-8b7fd4110ab8", "summary") of the paper @hu_towards_2025.
 
-==== Github Copilot
-It is a code completion tool, used as a more powerful alternative to verb suggestion or refactoring tools.
-
-=== Other
-TODO:
-- Spellchecking
-- Grammar checking
+- Github Copilot is a code completion tool, used as a more powerful alternative to verb suggestion, spell checking or refactoring tools.
 
 = State of the art
 The concept of profiling, i.e., the idea of measuring code performance for finding @PHot:pl, has been well established for decades.
@@ -283,9 +273,9 @@ For collecting the profile, the program was compiled with `gcc` and `-pg` flags 
 / total ms/call: Average call duration (call time + children)
 / name: Function name
 
-#v(5%)
+#v(1%)
 
-The profile shows that high amounts of execution time are spent in `raycast`, `get_object`, and `valid_coordinates`.
+The profile @gprof-output shows that high amounts of execution time are spent in `raycast`, `get_object`, and `valid_coordinates`.
 This (knowing the program) indicates that optimizing the `raycast` loop would speed up runtime, and (knowing) that `get_object` is essentially a wrapper calling `valid_coordinates`, which is a sanity check that should not occur; both of these functions might be entirely removed or at least optimized.
 
 After any optimization efforts, the program should be profiled again to verify improvements.
@@ -305,7 +295,8 @@ This is caused by:
 - Perf profiles more external events, while gprof is limited to the code that was compiled.
 - GProf does not account for its own instrumentation code, while Perf includes the performance of the syscalls.
 - Generally, the output here is being truncated to display only the major functions.
-#v(1fr)
+
+#v(1%)
 
 #figure(
 ```
@@ -332,11 +323,12 @@ Overhead  Command   Shared Object         Symbol
 ```,
 caption: [Example of `perf report`]
 ) <perf-output>
+*Legend:*
 / Overhead: % of total time
 / Command: profiled command (here just the binary)
 / Shared Object: Function source
 / Symbol: Function name (Or address in case of missing names)
-#v(1fr)
+#v(1%)
 
 #figure(
 ```
@@ -371,12 +363,19 @@ Skip(?), TODO
 
 == Visualization
 
+Different visualizations offer specialized insights.
+
+_Flame graphs_ show a linear overview of function calls and their hierarchy, which gives a general clue about what the program is doing as the program execution progresses.
+
+A _table_, listing the functions and their runtime statistics, provides condensed information about how to spend optimization efforts.
+
 === Tables
 A tabular representation like the flat profile @gprof-output offers represents how much time is spent in which symbols. This is useful for quickly identifying @PHot:pl.
 
 Note that due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
+// https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
 
 TODO
 === Call graphs
