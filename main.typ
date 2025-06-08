@@ -75,7 +75,7 @@
     Performance profiling is a method of analyzing where execution time is spent. 
     Using profiling tools, it is possible to locate @PHot:pl.
     To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
-    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
+    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally, a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
   ],
   acronyms: [
     #heading(outlined: false)[Glosarry / Acronyms Index]
@@ -100,7 +100,7 @@ Those presented are based on an iterative code-improvement cycle:
 - Execution using a profiler
 - Analyzing results for @PHot:pl
 - Inspecting hotspot code for optimization
-The concept of predictive profiling, i.e. predicting the profiling results without compiling the source code, as part of an @IDE, will be summarized. @hu_towards_2025
+The concept of predictive profiling, i.e., predicting the profiling results without compiling the source code, as part of an @IDE, will be summarized. @hu_towards_2025
 
 == Motivation
 In the process of iterative code-improvement, badly designed code may be visible early on, for example, a long-running function with little computational complexity.
@@ -206,11 +206,11 @@ Code is often changed over time, either by feature expansion, bug fixes, or othe
 
 These regressions often accumulate over time and are only attended to when performance has significantly degraded.
 
-With automated profiling, releases can be directly compared to their predecessors for varying input scenarios. This allows one to directly notice and identify the cause of the performance regression. @bernecky_profiling_1989
+With automated profiling, releases can be directly compared to their predecessors for varying input scenarios. This allows one to directly notice and identify the cause of performance regression. @bernecky_profiling_1989
 
 === Predictive Profiling
 Similar to @input-prediction, predictive profiling aims to provide performance indications without executing the program.
-Instead of basing on previously recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is based on learned runtimes of individual code snippets, predicting not the complete runtime but only the runtime of new snippets.
+Instead of basing it on previously recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is based on learned runtimes of individual code snippets, predicting not the complete runtime but only the runtime of new snippets.
 
 This is achieved by using machine learning on datasets that include C code snippets and their measured runtimes.
 
@@ -234,7 +234,7 @@ Additionally, average times per call are calculated.
 ==== Limitations and Drawbacks
 The added instrumentation (`-pg` flags) still adds significant overhead (which can be observed by profiling the instrumented binary as in @perf).
 
-GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982 as well as multithreaded applications.
+GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982, as well as multithreaded applications.
 
 ==== Example
 The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D grid to the nearest wall and prints a column with the corresponding height, resulting in a 3D view.
@@ -375,9 +375,7 @@ These can be obtained directly from `gprof` or `perf report`.
 Note that due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
-// https://www.usenix.org/conference/atc17/program/presentation/gregg-flame
-
-Flame graphs can be produced using an external tool, such as Brendan Gregg's FlameGraph tool (#link("https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html", "Description & Instructions")), these operate on a already collected profile, such as the one from `perf` or `gprof`.
+Flame graphs can be produced using an external tool, such as Brendan Gregg's FlameGraph tool (#link("https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html", "Description & Instructions")), which operates on an already collected profile, such as the one from `perf` or `gprof`.
 
 #figure(
   image("flamegraph.svg"),
@@ -388,26 +386,25 @@ Flame graphs can be produced using an external tool, such as Brendan Gregg's Fla
   ]
 ) <flamegraph>
 
-They give an hierarchical overview of the call stack, accumulating time spent in each child function.
+They give a hierarchical overview of the call stack, accumulating time spent in each child function.
 The width represents the amount of time spent in the function (and children), while calls made are stacked on top.
 
 This allows to identify @PHot:pl, as wide bars with no children indicate that the function is consuming a lot of time.
 The flamegraph in @flamegraph shows @PHot:pl in the user code `raycast`, `get_object`, and `valid_coordinates` and in external code `[libm.so.6]`.
-(Knowing the code) and looking (or asking ChatGPT) at the assembly code @perf-assembly, it becomes clear that double to int conversion, flooring operation and calls to short functions (`get_object` and `valid_coordinates`) take a lot of overhead.
+(Knowing the code) and looking (or asking ChatGPT) at the assembly code @perf-assembly, it becomes clear that double to int conversion, flooring operations, and calls to short functions (`get_object` and `valid_coordinates`) take a lot of overhead.
 
 === Call graphs
 Call graphs are similar to the tabular representation, but given per function each. 
 The rows (per entry) contain all parents (above the function itself), the function itself (the row providing index and time%) and all children (below the function).
 
-It is possible to see which children make up most of the time, and for how many of the total nr. of calls the parent is responsble for.
+It is possible to see which children make up most of the time, and for how many of the total number of calls the parent is responsible for.
 
-/ index: The number given to the function (Sorted by time%)
+/ index: The number given to the function (sorted by time%)
 / time%: % of program runtime spent in this function and children
-/ self: time(seconds) of runtime spent in this function
-/ children: time(seconds) of runtime spent in this function and children
-/ called (self/total): Nr. of calls to this child (self/total), or by this parent
+/ self: time (seconds) of runtime spent in this function
+/ children: time (seconds) of runtime spent in this function and children
+/ called (self/total): Number of calls to this child (self/total), or by this parent
 / name: Child/Parent name
-
 
 #v(1%)
 
@@ -452,84 +449,85 @@ index % time    self  children    called     name
 
 E.g in @gprof-callgraph `main [1]` all children are only called exclusivly by itself, while `get_object [3]` is called mostly by `raycast [2]` and a few times by `valid_position`.
 
-= On-the fly profiling
-This section will describe a conceptual development tool that builds upon profiling, the idea, implementation, usage, and limitations of this tool will be reviewed.
+= On-the-Fly profiling
+This section will describe a conceptual development tool that builds upon profiling.
+The idea, implementation, usage, and limitations of this tool will be reviewed.
 
 == Motivation
-The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individually, but especially for large programs, that are not feasible to build and run iteratively, this workflow can become slow.
+The process of traditional code profiling is an efficient workflow for identifying @PHot:pl individually, but especially for large programs that are not feasible to build and run iteratively, this workflow can become slow.
 
-The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the Fly_ (i.e., without any compilation or execution, while coding, visualized by the @IDE).
+The paper @hu_towards_2025 offers a complementary workflow: inspecting routine performance _On-the-Fly_ (i.e., without any compilation or execution, while coding, visualized by the @IDE).
 
 == Introduction
 With increasing layers of abstraction, it becomes harder to have a deep understanding of the performance impact of specific decisions.
 Profilers, used correctly, can give a general notion of how much time is spent in what area of the implementation. As with any other toolset, profilers must be learned to be used efficiently.
 
 Even then, optimizing a @PHot might not be a clear task. Say the goal is to optimize appending data to a list; if the list is sorted, perhaps the sorting comparison criteria take a lot of time.
-It could also be the case that the CPU cannot be fully utilized as linked-list traversal stages require memory fetching to pass before the next comparison can take place.
+It could also be the case that the CPU cannot be fully utilized, as linked-list traversal stages require memory fetching to complete before the next comparison can take place.
 This requires a deep understanding or precise profiling to figure out where time is spent inefficiently.
 
-_On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
+_On-the-Fly_ profiling aims to support the developer in this aspect, showing _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
 
-/ Retiring: Useful work, (arithmetic, logic, read/stores)
-/ Bad-speculation: Wrong specultative execution, e.g., branch mispredictions
+/ Retiring: Useful work (arithmetic, logic, reads/stores)
+/ Bad-speculation: Wrong speculative execution, e.g., branch mispredictions
 / Frontend-Bound: CPU is waiting for instructions, e.g., cache misses
-/ Backend-Bound: CPU is waiting for data, e.g., slow memory fetches 
+/ Backend-Bound: CPU is waiting for data, e.g., slow memory fetches
 
 == Implementation
 
 The prediction of performance distribution over the categories is based upon machine learning that takes roughly as input the C-code and provides a percentage distribution over the predicted CPU time distribution.
 
-The model was trained using snippets of C-code and the actual recorded CPU usage (by intel VTune, another profiler) given over the categories.
+The model was trained using snippets of C code and the actual recorded CPU usage (by Intel VTune, another profiler) given over the categories.
 
 === Training
 
-As the snippet as a string is not representativ of how the code is executed.
-The paper is using different representations of the code (Abstract Syntax Tree, Control Flow Graph and Data Flow Graph) as input for the model.
+As the snippet as a string is not representative of how the code is executed, the paper uses different representations of the code (Abstract Syntax Tree, Control Flow Graph, and Data Flow Graph) as input for the model.
 
-The model developed using a dataset of 240 C-Projects, collected from GitHub (Star rating was used as an indicator of quality).
+The model was developed using a dataset of 240 C projects, collected from GitHub (star rating was used as an indicator of quality).
 
-Of these only 83 were used for training as many lacked documentation or a correct buld process.
+Of these, only 83 were used for training, as many lacked documentation or a correct build process.
 
 === Accuracy
 
-Testing the model was done by using the actual mesured CPU usage of the project and comparing it to the predicted usage.
+Testing the model was done by using the actual measured CPU usage of the project and comparing it to the predicted usage.
 The prediction was within 10% of the actual usage in ~80% of the tests, and within 5% in ~50% of the tests.
 
 == Limitations
 
-The model and training process does not take compiler optimizations into account, the paper has tested 5 projects using optimization and the accuracy was within 10% for 70% and within 5% for ~40% of the tests.
+The model and training process do not take compiler optimizations into account.
+The paper has tested 5 projects using optimization, and the accuracy was within 10% for 70% and within 5% for ~40% of the tests.
 
 
 == Comparison to traditional profiling
 // Function analysis +on-the-fly
 Given the accuracy of the model, it is a viable alternative to profiling individual functions (in speed of applying the tool).
-The On-the Fly method gives an idea of how the function might misperform, while traditional profiling give you the time spent for itself and its children.
-Both require an understanding of the how the code is executed (as to understand why the yielded result is slow).
+The On-the-Fly method gives an idea of how the function might misperform, while traditional profiling gives you the time spent for itself and its children.
+Both require an understanding of how the code is executed (to understand why the yielded result is slow).
 
 // Overview +traditional
 Yet a big part of profiling is the overview of the entire program, _what parts_ are slow and _how much_ time is spent.
 Identifying a @PHot is more relevant than knowing how to optimize it.
 
 // Information derivation +traditional
-The information that can be derived from profiles (Performance regression, input growth, etc.) cannot be obtained using the On-the Fly method.
+The information that can be derived from profiles (performance regression, input growth, etc.) cannot be obtained using the On-the-Fly method.
 A new option is to see how the predicted distribution of an individual function changes over time, which could imply performance regression.
 
 #figure(
   table(
     columns: 3,
-    [Aspect], [On-the Fly], [Traditional Profiling],
+    [Aspect], [On-the-Fly], [Traditional Profiling],
     [Function Analysis], "Fast, predictive, mostly accurate", "Slow, measured, precise",
     [Program Overview], "No", "Yes",
     [Information Derivation], "New options, but no use-case", "Established methods",
   ),
-  caption: "Comparison of On-the Fly and traditional profiling"
+  caption: "Comparison of On-the-Fly and traditional profiling"
 )
 
 = Conclusion
 
-Profiling plays an essential role in measuring and optimizing large scale applications or any performance critical application.
-The tools can be used while actively looking to improve an application or in an automated fation, generated a performance history which allows to prevent regression or simply predict future performance.
+Profiling plays an essential role in measuring and optimizing large-scale applications or any performance-critical application.
+The tools can be used while actively looking to improve an application or in an automated fashion, generating a performance history which allows one to prevent regression or simply predict future performance.
 
-The On-the Fly method shows an interesting approach to effortless integrate the optimization stage into the code-writing process.
-While this method seems promising by the provided statistics, it does not substitute many aspects and use cases for traditional profiling tools.
-Should a usable tool be developed it would be beneficial to use both methods at different stages in the development cycle.
+The On-the-Fly method shows an interesting approach to effortlessly integrating the optimization stage into the code-writing process.
+While this method seems promising based on the provided statistics, it does not substitute for many aspects and use cases of traditional profiling tools.
+Should a usable tool be developed, it would be beneficial to use both methods at different stages in the development cycle.
