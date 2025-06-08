@@ -75,7 +75,7 @@
     Performance profiling is a method of analyzing where execution time is spent. 
     Using profiling tools, it is possible to locate @PHot:pl.
     To achieve this, the written user code is executed and recorded as a call graph, i. e. the relationship between a function and those it is calling. Such a recording can provide information about the number of calls and time spent in each function.
-    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally, a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
+    This report aims to describe different techniques of profiling, including their benefits, limitations and possible inaccuracies. Additionally a conceptual overview of a predictive profiling tool, as proposed in @hu_towards_2025, is given and compared to the usage of "traditional" profiling tools.
   ],
   acronyms: [
     #heading(outlined: false)[Glosarry / Acronyms Index]
@@ -100,7 +100,7 @@ Those presented are based on an iterative code-improvement cycle:
 - Execution using a profiler
 - Analyzing results for @PHot:pl
 - Inspecting hotspot code for optimization
-The concept of predictive profiling, i.e., predicting the profiling results without compiling the source code, as part of an @IDE, will be summarized. @hu_towards_2025
+The concept of predictive profiling, i.e. predicting the profiling results without compiling the source code, as part of an @IDE, will be summarized. @hu_towards_2025
 
 == Motivation
 In the process of iterative code-improvement, badly designed code may be visible early on, for example, a long-running function with little computational complexity.
@@ -206,11 +206,11 @@ Code is often changed over time, either by feature expansion, bug fixes, or othe
 
 These regressions often accumulate over time and are only attended to when performance has significantly degraded.
 
-With automated profiling, releases can be directly compared to their predecessors for varying input scenarios. This allows one to directly notice and identify the cause of performance regression. @bernecky_profiling_1989
+With automated profiling, releases can be directly compared to their predecessors for varying input scenarios. This allows one to directly notice and identify the cause of the performance regression. @bernecky_profiling_1989
 
 === Predictive Profiling
 Similar to @input-prediction, predictive profiling aims to provide performance indications without executing the program.
-Instead of basing it on previously recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is based on learned runtimes of individual code snippets, predicting not the complete runtime but only the runtime of new snippets.
+Instead of basing on previously recorded iterations of the entire program, predictive profiling as proposed in @hu_towards_2025 is based on learned runtimes of individual code snippets, predicting not the complete runtime but only the runtime of new snippets.
 
 This is achieved by using machine learning on datasets that include C code snippets and their measured runtimes.
 
@@ -234,7 +234,7 @@ Additionally, average times per call are calculated.
 ==== Limitations and Drawbacks
 The added instrumentation (`-pg` flags) still adds significant overhead (which can be observed by profiling the instrumented binary as in @perf).
 
-GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982, as well as multithreaded applications.
+GProf is not suited for programs "that exhibit a large degree of recursion" @graham_gprof_1982 as well as multithreaded applications.
 
 ==== Example
 The example @gprof-output is a profile of a small raycasting project, which calculates the distances of a position in a 2D grid to the nearest wall and prints a column with the corresponding height, resulting in a 3D view.
@@ -448,6 +448,13 @@ index % time    self  children    called     name
 ) <gprof-callgraph>
 
 E.g in @gprof-callgraph `main [1]` all children are only called exclusivly by itself, while `get_object [3]` is called mostly by `raycast [2]` and a few times by `valid_position`.
+
+= Relevance in modern applications
+(Also to answer the presentation question of wheter profiling can be applied for machine learning applications)
+
+While most tools presented here are focusing on C similar languages and neglecting optimizations to keep the topic moderately simple, the concepts of profiling are still relevant in modern applications.
+
+Many performance-critical applications are written in C-like languages, yet also higher abstractions such as Python are possible to profile. (Especially when using C extensions)
 
 = On-the-Fly profiling
 This section will describe a conceptual development tool that builds upon profiling.
