@@ -470,9 +470,15 @@ This requires a deep understanding or precise profiling to figure out where time
 
 _On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
 
+== How it works (change this title)
+
+== Comparison to traditional profiling
 
 = Conclusion
 
-Using an abbreviation like @TUHH is a good idea.
+Profiling plays an essential role in measuring and optimizing large scale applications or any performance critical application.
+The tools can be used while actively looking to improve an application or in an automated fation, generated a performance history which allows to prevent regression or simply predict future performance.
 
-@TUHH
+The On-the Fly method shows an interesting approach to effortless integrate the optimization stage into the code-writing process.
+While this method seems promising by the provided statistics, it does not substitute many aspects and use cases for traditional profiling tools.
+Should a usable tool be developed it would be beneficial to use both methods at different stages in the development cycle.
