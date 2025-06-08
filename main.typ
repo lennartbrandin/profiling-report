@@ -470,9 +470,60 @@ This requires a deep understanding or precise profiling to figure out where time
 
 _On-the Fly_ profiling aims to support the developer in this aspect, telling _how_ time is spent. This is based on categories introduced in @yasin_top-down_2014.
 
-== How it works (change this title)
+/ Retiring: Useful work, (arithmetic, logic, read/stores)
+/ Bad-speculation: Wrong specultative execution, e.g., branch mispredictions
+/ Frontend-Bound: CPU is waiting for instructions, e.g., cache misses
+/ Backend-Bound: CPU is waiting for data, e.g., slow memory fetches 
+
+== Implementation
+
+The prediction of performance distribution over the categories is based upon machine learning that takes roughly as input the C-code and provides a percentage distribution over the predicted CPU time distribution.
+
+The model was trained using snippets of C-code and the actual recorded CPU usage (by intel VTune, another profiler) given over the categories.
+
+=== Training
+
+As the snippet as a string is not representativ of how the code is executed.
+The paper is using different representations of the code (Abstract Syntax Tree, Control Flow Graph and Data Flow Graph) as input for the model.
+
+The model developed using a dataset of 240 C-Projects, collected from GitHub (Star rating was used as an indicator of quality).
+
+Of these only 83 were used for training as many lacked documentation or a correct buld process.
+
+=== Accuracy
+
+Testing the model was done by using the actual mesured CPU usage of the project and comparing it to the predicted usage.
+The prediction was within 10% of the actual usage in ~80% of the tests, and within 5% in ~50% of the tests.
+
+== Limitations
+
+The model and training process does not take compiler optimizations into account, the paper has tested 5 projects using optimization and the accuracy was within 10% for 70% and within 5% for ~40% of the tests.
+
 
 == Comparison to traditional profiling
+// Function analysis +on-the-fly
+Given the accuracy of the model, it is a viable alternative to profiling individual functions (in speed of applying the tool).
+The On-the Fly method gives an idea of how the function might misperform, while traditional profiling give you the time spent for itself and its children.
+Both require an understanding of the how the code is executed (as to understand why the yielded result is slow).
+
+// Overview +traditional
+Yet a big part of profiling is the overview of the entire program, _what parts_ are slow and _how much_ time is spent.
+Identifying a @PHot is more relevant than knowing how to optimize it.
+
+// Information derivation +traditional
+The information that can be derived from profiles (Performance regression, input growth, etc.) cannot be obtained using the On-the Fly method.
+A new option is to see how the predicted distribution of an individual function changes over time, which could imply performance regression.
+
+#figure(
+  table(
+    columns: 3,
+    [Aspect], [On-the Fly], [Traditional Profiling],
+    [Function Analysis], "Fast, predictive, mostly accurate", "Slow, measured, precise",
+    [Program Overview], "No", "Yes",
+    [Information Derivation], "New options, but no use-case", "Established methods",
+  ),
+  caption: "Comparison of On-the Fly and traditional profiling"
+)
 
 = Conclusion
 
