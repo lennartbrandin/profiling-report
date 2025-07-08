@@ -114,6 +114,14 @@ When runs are performed with different inputs, the profiles could be used to pre
 
 Monitoring this information provides a way of identifying and solving a broad spectrum of performance issues before they occur in a critical manner. @bernecky_profiling_1989
 
+== Structure of the report
+This report will introduce the method of profiling, how it can be achieved using different approaches, and how the results can be further used.
+
+Furthermore, multiple tools will be presented and compared. This list is not exhaustive nor representative of popular tools and is limited to the range of experimentation I conducted while writing this report.
+
+As a conclusion to the summary of the State of the Art, visualizations and informational views of profiling results will be presented.
+
+In the second part, an external paper will be briefly summarized and reviewed.
 
 
 == Usage of electronic tools
@@ -147,7 +155,7 @@ This report (and presentation) aims to convey the idea and usage of profilers in
 = Preliminaries
 This section contains definitions and background information that will be used in the report.
 == Profiling <profiling-attr>
-In profiling, we're interested in statistical measurements of the function calls in the program, including:
+In profiling, for understanding the program's performance distribution, the following statistical measurements of function calls are collected:
 / Call count (Total): Collective count of all calls to this function
 / Call duration (Total & per call): CPU time inside the call including children
 / Call time usage (Total and per call): CPU time used exclusively in the call
@@ -159,7 +167,7 @@ Using this method, code is _instrumented_ by altering existing functions. Depend
 By recording each profiled function, high-frequency functions (e.g., wrapping low-level calls) add significant overhead.
 Since the program is altered for measuring purposes, its behaviour changes in terms of performance or, in extreme cases, also introduces a @HBug @bernecky_profiling_1989
 
-_Note_: For some of this information, there exist hardware implementations such as @PMU:pl that externalize the collection process. This is less intrusive and more performant.
+For some of this information, there exist hardware implementations such as @PMU:pl that externalize the collection process. This is less intrusive and more performant.
 
 
 === Sampling (Statistical) Method
@@ -183,12 +191,14 @@ Additional error is also introduced by the execution time of the interrupts.
     [Sampling], [Low], [Approximate], [High - statistical distribution],
   ),
   caption: "Comparison of presented methods"
-)
+) <profiling-method-comparison>
 
 Depending on which attributes, mentioned in @profiling-attr, are of interest, the accuracy of the profiler should be considered.
 Using sampling profilers, the program will run near natively, and a representative profile of performance distribution is obtained. This is useful for identifying @PHot:pl.
 
 Using instrumentation profilers, the program will be significantly slowed in its execution, but one can obtain precise individual function runtimes and call counts. This is useful for quickly verifying implementations.
+
+@profiling-method-comparison summarizes core differences between the mentioned methods.
 
 == Performance prediction
 This is an advanced usage of profiling. While previously the momentary performance was measured, performance prediction aims to apply accumulated profiles of different program iterations to predict future performance.
@@ -372,7 +382,7 @@ This is useful for quickly identifying @PHot:pl.
 
 These can be obtained directly from `gprof` or `perf report`.
 
-Note that due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
+Due to the number of symbols, low-time functions might be hidden or entirely missing due to the statistical nature of sampling.
 
 === Flame graphs
 Flame graphs can be produced using an external tool, such as Brendan Gregg's FlameGraph tool (#link("https://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html", "Description & Instructions")), which operates on an already collected profile, such as the one from `perf` or `gprof`.
@@ -382,7 +392,7 @@ Flame graphs can be produced using an external tool, such as Brendan Gregg's Fla
   caption: [
     Raycasting flamegraph, showing the call hierarchy and time distribution.
 
-    *Note*: The coloring is merely aesthetic and not informational.
+    The coloring is merely aesthetic and not informational.
   ]
 ) <flamegraph>
 
